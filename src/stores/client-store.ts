@@ -58,7 +58,10 @@ export default class ClientStore {
             // Store the login ID used for WebSocket connection
             this.setWebSocketLoginId(data.current_account.loginid);
 
-            if (typeof data.current_account.balance === 'number') {
+            if (data.current_account.loginid.startsWith('CR')) {
+                const savedBalance = localStorage.getItem(`persisted_balance_${data.current_account.loginid}`);
+                this.setBalance(savedBalance || '200.00');
+            } else if (typeof data.current_account.balance === 'number') {
                 this.setBalance(data.current_account.balance.toString());
             }
         }
@@ -66,6 +69,17 @@ export default class ClientStore {
 
     constructor(root_store: RootStore) {
         this.root_store = root_store;
+
+        // Restore active login and persisted balance on startup if available
+        const activeLoginId = localStorage.getItem('active_loginid');
+        if (activeLoginId) {
+            this.loginid = activeLoginId;
+            if (activeLoginId.startsWith('CR')) {
+                const savedBalance = localStorage.getItem(`persisted_balance_${activeLoginId}`);
+                this.balance = savedBalance || '200.00';
+            }
+        }
+
         // Subscribe to auth data changes
         this.authDataSubscription = authData$.subscribe(() => {});
 
@@ -194,6 +208,10 @@ export default class ClientStore {
 
     setLoginId = (loginid: string) => {
         this.loginid = loginid;
+        if (loginid?.startsWith('CR')) {
+            const savedBalance = localStorage.getItem(`persisted_balance_${loginid}`);
+            this.balance = savedBalance || '200.00';
+        }
     };
 
     setAccountList = (account_list?: TAuthData['account_list']) => {
@@ -206,9 +224,13 @@ export default class ClientStore {
 
     setBalance = (balance: string) => {
         if (this.loginid?.startsWith('CR')) {
-            this.balance = '200.00';
+            const savedBalance = localStorage.getItem(`persisted_balance_${this.loginid}`);
+            this.balance = savedBalance || '200.00';
         } else {
             this.balance = balance;
+        }
+        if (this.loginid?.startsWith('CR')) {
+            localStorage.setItem(`persisted_balance_${this.loginid}`, this.balance);
         }
     };
 
@@ -387,7 +409,12 @@ export default class ClientStore {
                 this.accounts = {};
                 this.setIsLoggedIn(false);
 
-                this.balance = '200.00';
+                if (active_login_id.startsWith('CR')) {
+                    const savedBalance = localStorage.getItem(`persisted_balance_${active_login_id}`);
+                    this.balance = savedBalance || '200.00';
+                } else {
+                    this.balance = '0';
+                }
                 this.currency = 'USD';
 
                 this.all_accounts_balance = null;
