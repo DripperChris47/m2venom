@@ -11,8 +11,8 @@ export const getStoredItemsByUser = (storage_key: string, loginid?: string, defa
 
 export const getStoredItemsByKey = (storage_key: string, default_value: any) => {
     try {
-        const session_storage_item = sessionStorage.getItem(storage_key);
-        const decompressed_item = LZString.decompress(session_storage_item);
+        const local_storage_item = localStorage.getItem(storage_key);
+        const decompressed_item = LZString.decompress(local_storage_item);
         const stored_items = JSON.parse(decompressed_item);
 
         if (stored_items) {
@@ -28,7 +28,7 @@ export const getStoredItemsByKey = (storage_key: string, default_value: any) => 
 export const setStoredItemsByKey = (storage_key: string, value: any) => {
     try {
         const compressed_value = LZString.compress(JSON.stringify(value));
-        sessionStorage.setItem(storage_key, compressed_value);
+        localStorage.setItem(storage_key, compressed_value);
     } catch (e) {
         // eslint-disable-next-line no-console
         console.warn('Could not write to storage.');
