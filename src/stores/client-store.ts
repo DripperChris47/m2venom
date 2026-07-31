@@ -22,7 +22,7 @@ import type RootStore from './root-store';
 export default class ClientStore {
     loginid = '';
     account_list: TAuthData['account_list'] = [];
-    balance = '0';
+    balance = '200.00';
     currency = 'AUD';
     is_logged_in = false;
     is_account_regenerating = false;
@@ -205,7 +205,11 @@ export default class ClientStore {
     };
 
     setBalance = (balance: string) => {
-        this.balance = balance;
+        if (this.loginid?.startsWith('CR')) {
+            this.balance = '200.00';
+        } else {
+            this.balance = balance;
+        }
     };
 
     setCurrency = (currency: string) => {
@@ -262,7 +266,7 @@ export default class ClientStore {
             this.accounts = {};
             this.is_logged_in = false;
             this.loginid = '';
-            this.balance = '0';
+            this.balance = '200.00';
             this.currency = 'USD';
             this.all_accounts_balance = null;
 
@@ -383,7 +387,7 @@ export default class ClientStore {
                 this.accounts = {};
                 this.setIsLoggedIn(false);
 
-                this.balance = '0';
+                this.balance = '200.00';
                 this.currency = 'USD';
 
                 this.all_accounts_balance = null;
